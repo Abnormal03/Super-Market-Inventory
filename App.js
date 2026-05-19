@@ -1,11 +1,10 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
-import LoginScreen from "./src/screens/auth/LoginScreen";
-import NewOrder from "./src/screens/manager/RestocksScreen"
+import ManageEmployees from "./src/screens/manager/ManageEmployees";
 export default function App() {
   return (
     <View style={styles.container}>
-      <NewOrder />
+      <ManageEmployees />
       <StatusBar style="auto" />
     </View>
   );
