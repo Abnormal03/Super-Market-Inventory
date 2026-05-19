@@ -8,7 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import Button from "../../components/button";
+import Button from "../../components/Button";
 
 export default function LoginScreen() {
   const [username, setUsername] = useState("");
