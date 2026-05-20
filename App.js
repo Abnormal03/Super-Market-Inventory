@@ -1,10 +1,10 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
-import SalesAnalyticsScreen from "./src/screens/manager/SalesAnalysis";
+import CashierLeaderboard from "./src/screens/manager/CashierLeaderboard";
 export default function App() {
   return (
     <View style={styles.container}>
-      <SalesAnalyticsScreen />
+      <CashierLeaderboard />
       <StatusBar style="auto" />
     </View>
   );
