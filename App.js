@@ -1,10 +1,10 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
-import InventoryOverview from "./src/screens/manager/InventoryOverview";
+import MainDashBoardScreen from "./src/screens/manager/MainDashboardScreen";
 export default function App() {
   return (
     <View style={styles.container}>
-      <InventoryOverview />
+      <MainDashBoardScreen />
       <StatusBar style="auto" />
     </View>
   );
