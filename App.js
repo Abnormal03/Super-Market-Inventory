@@ -1,10 +1,10 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
-import CashierDeskScreen from "./src/screens/cashier/CashierDeskScreen";
+import RootNavigator from "./src/navigation/RootNavigator";
 export default function App() {
   return (
     <View style={styles.container}>
-      <CashierDeskScreen />
+      <RootNavigator />
       <StatusBar style="auto" />
     </View>
   );

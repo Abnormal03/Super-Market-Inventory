@@ -35,7 +35,6 @@ export default function SupplierDirectory({ navigation }) {
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <BackButton onPress={() => navigation?.goBack()} />
         <Text style={styles.headerTitle}>Supplier Directory</Text>
       </View>
       <View style={styles.pageHeader}>
@@ -95,7 +94,7 @@ export default function SupplierDirectory({ navigation }) {
         )}
       </View>
 
-      <Button text="+ New Supplier" onPress={() => {}} />
+      <Button text="+ New Supplier" onPress={() => navigation.navigate("RegisterSupplier")} />
     </ScrollView>
   );
 }

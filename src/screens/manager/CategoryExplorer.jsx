@@ -21,7 +21,6 @@ export default function CategoryExplorer({ navigation }) {
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <BackButton onPress={() => navigation?.goBack()} />
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>Category Explorer</Text>
         </View>
@@ -48,7 +47,7 @@ export default function CategoryExplorer({ navigation }) {
             <TouchableOpacity
               style={styles.btnOutline}
               onPress={() =>
-                navigation?.navigate("SpecificCategory", { id: cat.id })
+                navigation?.navigate("SpecificCategory")
               }
             >
               <Text style={styles.btnOutlineText}>View Items</Text>

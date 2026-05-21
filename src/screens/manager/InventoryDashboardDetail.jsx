@@ -50,7 +50,7 @@ export default function InventoryDashboardDetail({ navigation, route }) {
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <BackButton onPress={() => navigation?.navigate("InventoryOverview")} />
+        <BackButton onPress={() => navigation.goBack()} />
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>{title}</Text>
         </View>
@@ -63,7 +63,6 @@ export default function InventoryDashboardDetail({ navigation, route }) {
         {/* Table Header */}
         <View style={styles.tableRowHeader}>
           <Text style={[styles.th, { flex: 2 }]}>Product Name</Text>
-          <Text style={[styles.th, { flex: 1 }]}>Barcode</Text>
           <Text style={[styles.th, { flex: 1 }]}>Batch ID</Text>
           <Text style={[styles.th, { flex: 1 }]}>Qty</Text>
           <Text style={[styles.th, { flex: 1.5 }]}>Expiry</Text>
@@ -76,7 +75,6 @@ export default function InventoryDashboardDetail({ navigation, route }) {
             <Text style={[styles.td, { flex: 2, fontWeight: "700" }]}>
               {item.name}
             </Text>
-            <Text style={[styles.td, { flex: 1 }]}>{item.barcode}</Text>
             <Text style={[styles.td, { flex: 1 }]}>
               {item.batch_id ? `#${item.batch_id}` : "—"}
             </Text>

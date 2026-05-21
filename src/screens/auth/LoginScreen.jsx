@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import Button from "../../components/Button";
 
-export default function LoginScreen() {
+export default function LoginScreen({navigation}) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -60,7 +60,7 @@ export default function LoginScreen() {
 
           {/* Login Button */}
           <View style={styles.buttonWrapper}>
-            <Button text="Login" onPress={() => {}} />
+            <Button text="Login" onPress={() => navigation.replace("MainTabs")} />
           </View>
         </View>
       </ScrollView>

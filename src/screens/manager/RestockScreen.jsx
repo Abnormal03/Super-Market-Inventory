@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import BackButton from "../../components/BackButton";
 
-export default function RestockScreen() {
+export default function RestockScreen({ navigation }) {
   const [barcode, setBarcode] = useState("");
   const [name, setName] = useState("");
   const [sellingPrice, setSellingPrice] = useState("");
@@ -26,11 +26,13 @@ export default function RestockScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
     >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Header */}
         <View style={styles.header}>
-          <BackButton onPress={() => {}} />
+          <BackButton onPress={() => navigation.goBack()} />
           <Text style={styles.headerTitle}>New Stock Entry</Text>
         </View>
         <View style={styles.headerdescription}>
