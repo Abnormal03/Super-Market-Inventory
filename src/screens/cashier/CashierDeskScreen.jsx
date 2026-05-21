@@ -13,12 +13,18 @@ import {
 import BackButton from "../../components/BackButton";
 
 export default function CashierDeskScreen({ navigation }) {
-  const [cart, setCart] = useState([]);
+  // Mock data included for visual presentation; handles dynamic additions flawlessly
+  const [cart, setCart] = useState([
+    { name: "Premium Sunflower Oil 5L", qty: 2, price: 1200.0 },
+    { name: "White Long Grain Rice 5kg", qty: 1, price: 650.0 },
+  ]);
   const [paymentMode, setPaymentMode] = useState("Cash");
+  const [focusedInput, setFocusedInput] = useState(false);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const tax = subtotal * 0.15;
+  const tax = subtotal * 0.15; // Standard 15% VAT calculation
   const grandTotal = subtotal + tax;
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -26,7 +32,7 @@ export default function CashierDeskScreen({ navigation }) {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {/* Header */}
+        {/* Top Operational Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <BackButton onPress={() => navigation?.goBack()} />
@@ -38,28 +44,44 @@ export default function CashierDeskScreen({ navigation }) {
               </View>
             </View>
           </View>
+
+          {/* Premium Header Logout Action */}
+          <TouchableOpacity 
+            style={styles.logoutBtn} 
+            onPress={()=> navigation.replace("Login")}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.logoutIcon}>🚪</Text>
+            <Text style={styles.logoutText}>Exit Session</Text>
+          </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
-          {/* Scanner Controls */}
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+          
+          {/* Hardware & Manual Scanning Controls Card */}
           <View style={styles.card}>
-            <TouchableOpacity style={styles.btnScan}>
+            <TouchableOpacity style={styles.btnScan} activeOpacity={0.75}>
               <Text style={styles.btnScanText}>📷 Toggle Barcode Camera</Text>
             </TouchableOpacity>
             
             <View style={styles.manualGroup}>
-              <TextInput 
-                style={styles.input} 
-                placeholder="Enter Item Barcode or SKU..." 
-                placeholderTextColor="#94A3B8"
-              />
-              <TouchableOpacity style={styles.btnAdd}>
+              <View style={[styles.inputWrapper, focusedInput && styles.inputWrapperFocused]}>
+                <Text style={styles.inputIcon}>🏷️</Text>
+                <TextInput 
+                  style={styles.input} 
+                  placeholder="Enter Item Barcode or SKU..." 
+                  placeholderTextColor="#94a3b8"
+                  onFocus={() => setFocusedInput(true)}
+                  onBlur={() => setFocusedInput(false)}
+                />
+              </View>
+              <TouchableOpacity style={styles.btnAdd} activeOpacity={0.8}>
                 <Text style={styles.btnAddText}>Add Item</Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* Cart Table */}
+          {/* Real-time Active Cart Table Section */}
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>🛒 Active Cart</Text>
             
@@ -70,7 +92,7 @@ export default function CashierDeskScreen({ navigation }) {
               </View>
             ) : (
               <View style={styles.table}>
-                {/* Table Header */}
+                {/* Table Header Row */}
                 <View style={styles.tableHeaderRow}>
                   <Text style={[styles.tableHeaderCell, { flex: 2, textAlign: "left" }]}>Item Description</Text>
                   <Text style={[styles.tableHeaderCell, { flex: 0.6, textAlign: "center" }]}>Qty</Text>
@@ -78,20 +100,20 @@ export default function CashierDeskScreen({ navigation }) {
                   <Text style={[styles.tableHeaderCell, { flex: 1.2, textAlign: "right" }]}>Total</Text>
                 </View>
 
-                {/* Table Body */}
+                {/* Table Dynamic Rows */}
                 {cart.map((item, idx) => (
                   <View key={idx} style={styles.row}>
-                    <Text style={[styles.cell, { flex: 2, textAlign: "left", fontWeight: "500" }]} numberOfLines={1}>
+                    <Text style={[styles.cell, { flex: 2, textAlign: "left", fontWeight: "600", color: "#0f172a" }]} numberOfLines={1}>
                       {item.name}
                     </Text>
-                    <Text style={[styles.cell, { flex: 0.6, textAlign: "center", color: "#64748B" }]}>
+                    <Text style={[styles.cell, { flex: 0.6, textAlign: "center", fontWeight: "600", color: "#64748b" }]}>
                       {item.qty}
                     </Text>
-                    <Text style={[styles.cell, { flex: 1, textAlign: "right", color: "#64748B" }]}>
-                      {item.price.toFixed(2)}
+                    <Text style={[styles.cell, { flex: 1, textAlign: "right", color: "#64748b", fontWeight: "500" }]}>
+                      {item.price.toFixed(0)}
                     </Text>
-                    <Text style={[styles.cell, { flex: 1.2, textAlign: "right", fontWeight: "600", color: "#0F172A" }]}>
-                      ETB {(item.price * item.qty).toFixed(2)}
+                    <Text style={[styles.cell, { flex: 1.2, textAlign: "right", fontWeight: "700", color: "#0f172a" }]}>
+                      ETB {(item.price * item.qty).toLocaleString()}
                     </Text>
                   </View>
                 ))}
@@ -99,27 +121,28 @@ export default function CashierDeskScreen({ navigation }) {
             )}
           </View>
 
-          {/* Checkout Panel */}
+          {/* Core Checkout & Invoicing Summary Block */}
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>💰 Transaction Overview</Text>
+            <Text style={styles.sectionTitle}>💵 Transaction Overview</Text>
             
+            {/* Focal Point Total Box */}
             <View style={styles.amountBox}>
               <Text style={styles.amountLabel}>Grand Total Due</Text>
-              <Text style={styles.amountValue}>ETB {grandTotal.toFixed(2)}</Text>
+              <Text style={styles.amountValue}>ETB {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</Text>
             </View>
 
             <View style={styles.summaryContainer}>
               <View style={styles.summaryLine}>
                 <Text style={styles.summaryLabel}>Subtotal</Text>
-                <Text style={styles.summaryValue}>ETB {subtotal.toFixed(2)}</Text>
+                <Text style={styles.summaryValue}>ETB {subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</Text>
               </View>
               <View style={styles.summaryLine}>
                 <Text style={styles.summaryLabel}>VAT / Tax (15%)</Text>
-                <Text style={styles.summaryValue}>ETB {tax.toFixed(2)}</Text>
+                <Text style={styles.summaryValue}>ETB {tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</Text>
               </View>
             </View>
 
-            <Text style={[styles.sectionTitle, { marginTop: 12, marginBottom: 12 }]}>Payment Method</Text>
+            <Text style={[styles.sectionTitle, { marginTop: 20, marginBottom: 12 }]}>Payment Method</Text>
             <View style={styles.methodGrid}>
               {["Cash", "Telebirr", "Card"].map((mode) => {
                 const isActive = paymentMode === mode;
@@ -128,6 +151,7 @@ export default function CashierDeskScreen({ navigation }) {
                     key={mode}
                     style={[styles.methodBtn, isActive && styles.methodActive]}
                     onPress={() => setPaymentMode(mode)}
+                    activeOpacity={0.7}
                   >
                     <Text style={[styles.methodText, isActive && styles.methodTextActive]}>
                       {mode === "Telebirr" ? "📱 " : mode === "Card" ? "💳 " : "💵 "}
@@ -138,6 +162,7 @@ export default function CashierDeskScreen({ navigation }) {
               })}
             </View>
 
+            {/* High-Contrast Finalization Button */}
             <TouchableOpacity style={styles.btnFinish} activeOpacity={0.8}>
               <Text style={styles.btnFinishText}>Complete Transaction</Text>
             </TouchableOpacity>
@@ -151,253 +176,301 @@ export default function CashierDeskScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#ffffff",
   },
   scroll: { 
     flex: 1, 
-    backgroundColor: "#F8FAFC" // Slate premium background 
+    backgroundColor: "#f8fafc",
   },
   container: { 
-    padding: 16, 
+    padding: 20, 
     paddingBottom: 40, 
   },
 
-  /* Header Configuration */
+  /* Premium Header Matrix */
   header: { 
     flexDirection: "row", 
     alignItems: "center", 
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    marginTop:55,
-    borderBottomColor: "#F1F5F9",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 1.5,
+    borderBottomColor: "#f1f5f9",
+    ...Platform.select({
+      ios: { paddingTop: 12 },
+      android: { marginTop: 40 }
+    })
   },
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
   },
   headerTitleContainer: {
-    marginLeft: 15,
+    marginLeft: 14,
   },
   headerTitle: { 
-    fontSize: 18, 
-    fontWeight: "700", 
-    color: "#0F172A" 
+    fontSize: 20, 
+    fontWeight: "800", 
+    color: "#0f172a",
+    letterSpacing: -0.3,
   },
   statusContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 2,
+    marginTop: 3,
   },
   statusDot: { 
     width: 6, 
     height: 6, 
     borderRadius: 3, 
-    backgroundColor: "#10B981", // Emerald active online state
+    backgroundColor: "#2ecc71", // Vibrant emerald indicator
     marginRight: 6 
   },
   statusText: {
     fontSize: 12,
-    color: "#64748B",
-    fontWeight: "500",
+    color: "#64748b",
+    fontWeight: "600",
+  },
+  
+  /* Modern Clean Logout Element */
+  logoutBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fef2f2", // Ultra-light subtle crimson red block tint
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#fee2e2",
+  },
+  logoutIcon: {
+    fontSize: 12,
+    marginRight: 6,
+  },
+  logoutText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#ef4444", // Clean soft operational red text
   },
 
-  /* Card Base Style */
+  /* Unified Form Card Shells */
   card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: "#0f172a",
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    shadowColor: "#0F172A",
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2,
+    borderColor: "#e2e8f0",
   },
   sectionTitle: { 
-    fontSize: 14, 
-    fontWeight: "700", 
-    color: "#334155", 
+    fontSize: 12, 
+    fontWeight: "800", 
+    color: "#475569", 
     textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginBottom: 14 
+    letterSpacing: 0.8,
+    marginBottom: 16 
   },
 
-  /* Scanner Component Group */
+  /* Input and Camera Blocks */
   btnScan: {
-    backgroundColor: "#F1F5F9",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    padding: 12,
-    borderRadius: 10,
+    backgroundColor: "#f1f5f9",
+    borderWidth: 1.5,
+    borderColor: "#e2e8f0",
+    padding: 14,
+    borderRadius: 12,
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 14,
   },
   btnScanText: { 
     color: "#475569", 
-    fontWeight: "600",
-    fontSize: 14
+    fontWeight: "700",
+    fontSize: 14,
   },
   manualGroup: { 
     flexDirection: "row", 
-    gap: 10 
+    gap: 12,
+  },
+  inputWrapper: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f8fafc",
+    borderWidth: 1.5,
+    borderColor: "#e2e8f0",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    height: 48,
+  },
+  inputWrapperFocused: {
+    borderColor: "#0056b3",
+    backgroundColor: "#ffffff",
+  },
+  inputIcon: {
+    fontSize: 14,
+    marginRight: 8,
+    opacity: 0.8,
   },
   input: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
     fontSize: 14,
-    color: "#0F172A",
+    fontWeight: "500",
+    color: "#0f172a",
+    height: "100%",
   },
   btnAdd: {
-    backgroundColor: "#4F46E5", // Elegant Tech Indigo
-    paddingVertical: 10,
+    backgroundColor: "rgba(0, 86, 179, 0.06)", // Tertiary style matching your layout framework
+    borderWidth: 1.5,
+    borderColor: "#0056b3",
     paddingHorizontal: 18,
-    borderRadius: 10,
+    borderRadius: 12,
     justifyContent: "center",
   },
   btnAddText: { 
-    color: "#FFFFFF", 
-    fontWeight: "600",
-    fontSize: 14
+    color: "#0056b3", 
+    fontWeight: "700",
+    fontSize: 14,
   },
 
-  /* Structural Cart Layout Grid */
+  /* Cart Layout Structures */
   table: {
-    marginTop: 4,
+    marginTop: 2,
   },
   tableHeaderRow: {
     flexDirection: "row",
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0",
-    marginBottom: 4,
+    paddingBottom: 10,
+    borderBottomWidth: 1.5,
+    borderBottomColor: "#e2e8f0",
+    marginBottom: 6,
   },
   tableHeaderCell: {
     fontSize: 11,
-    fontWeight: "700",
-    color: "#94A3B8",
+    fontWeight: "800",
+    color: "#94a3b8",
     textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
-    paddingVertical: 12,
+    borderBottomColor: "#f1f5f9",
+    paddingVertical: 14,
   },
   cell: { 
     fontSize: 14, 
-    color: "#334155" 
+    color: "#334155",
   },
   emptyContainer: {
-    paddingVertical: 32,
+    paddingVertical: 40,
     alignItems: "center",
   },
   emptyText: { 
     fontSize: 14, 
-    color: "#64748B", 
-    fontWeight: "600"
+    color: "#64748b", 
+    fontWeight: "700",
   },
   emptySubtext: {
     fontSize: 12,
-    color: "#94A3B8",
+    color: "#94a3b8",
     marginTop: 4,
   },
 
-  /* Modern Invoice Box Layout */
+  /* Grand Total Summary Window */
   amountBox: {
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: "#f8fafc",
+    borderWidth: 1.5,
+    borderColor: "#e2e8f0",
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 18,
     alignItems: "center",
   },
   amountLabel: { 
-    fontSize: 12, 
-    color: "#64748B",
-    fontWeight: "600",
+    fontSize: 11, 
+    color: "#64748b",
+    fontWeight: "700",
     textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginBottom: 4
+    letterSpacing: 0.8,
+    marginBottom: 4,
   },
   amountValue: { 
-    fontSize: 24, 
-    fontWeight: "800", 
-    color: "#0F172A" 
+    fontSize: 26, 
+    fontWeight: "900", 
+    color: "#0f172a",
+    letterSpacing: -0.5,
   },
   summaryContainer: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9",
-    paddingBottom: 12,
+    borderBottomWidth: 1.5,
+    borderBottomColor: "#f1f5f9",
+    paddingBottom: 14,
     marginBottom: 4,
   },
   summaryLine: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   summaryLabel: {
-    color: "#64748B",
+    color: "#64748b",
     fontSize: 14,
+    fontWeight: "500",
   },
   summaryValue: {
     color: "#334155",
-    fontWeight: "600",
+    fontWeight: "700",
     fontSize: 14,
   },
 
-  /* Payment Interface Grid Selector */
+  /* Payment Selection Framework */
   methodGrid: { 
     flexDirection: "row", 
-    gap: 8,
-    marginBottom: 8
+    gap: 10,
+    marginBottom: 4,
   },
   methodBtn: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 10,
-    paddingVertical: 12,
+    backgroundColor: "#ffffff",
+    borderWidth: 1.5,
+    borderColor: "#e2e8f0",
+    borderRadius: 12,
+    paddingVertical: 14,
     alignItems: "center",
   },
   methodActive: { 
-    backgroundColor: "#EEF2FF", 
-    borderColor: "#4F46E5",
+    backgroundColor: "rgba(0, 86, 179, 0.04)", 
+    borderColor: "#0056b3",
   },
   methodText: { 
     fontSize: 13, 
-    fontWeight: "600", 
-    color: "#475569" 
+    fontWeight: "700", 
+    color: "#475569",
   },
   methodTextActive: { 
-    color: "#4F46E5" 
+    color: "#0056b3",
   },
 
-  /* POS Finish Primary Interaction Button */
+  /* Premium Complete Transaction Button */
   btnFinish: {
-    backgroundColor: "#10B981", // Modern Retail Checkout Emerald 
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginTop: 20,
+    backgroundColor: "#2ecc71", // Clean operational emerald checkout color
+    height: 54,
+    borderRadius: 14,
+    marginTop: 24,
     alignItems: "center",
-    shadowColor: "#10B981",
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+    justifyContent: "center",
+    shadowColor: "#2ecc71",
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
   btnFinishText: { 
-    color: "#FFFFFF", 
-    fontWeight: "700", 
-    fontSize: 15 
+    color: "#ffffff", 
+    fontWeight: "800", 
+    fontSize: 16,
   },
 });
