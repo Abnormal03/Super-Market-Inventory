@@ -94,7 +94,7 @@ export default function SupplierDirectory({ navigation }) {
         )}
       </View>
 
-      <Button text="+ New Supplier" onPress={() => navigation.navigate("RegisterSupplier")} />
+      <Button text="+ New Supplier" variant="tertiary" onPress={() => navigation.navigate("RegisterSupplier")} />
     </ScrollView>
   );
 }

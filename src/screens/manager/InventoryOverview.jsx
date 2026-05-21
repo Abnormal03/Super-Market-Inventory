@@ -95,7 +95,7 @@ export default function InventoryOverview({ navigation }) {
           </Animated.View>        
         ))}
       </View>
-          <Button text="+ New Order" onPress={()=> navigation.navigate("RestockScreen")}/>
+          <Button text="+ New Order" variant="tertiary" onPress={()=> navigation.navigate("RestockScreen")}/>
     </ScrollView>
   );
 }
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "800",
     color: "#0056b3",
     letterSpacing: -0.5,
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   cardValue: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "800",
     color: "#0f172a",
     marginBottom: 4,

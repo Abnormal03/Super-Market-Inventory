@@ -3,6 +3,7 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack"; // ✅ fixed spelling
 import MainTabs from "./MainTabs";
+import CashierDeskScreen from "../screens/cashier/CashierDeskScreen";
 import LoginScreen from "../screens/auth/LoginScreen";
 import DailySalesScreen from "../screens/manager/DailySalesScreen";
 import InventoryDashboardDetail from "../screens/manager/InventoryDashboardDetail";
@@ -19,6 +20,7 @@ const RootNavigator = () => {
       <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="MainTabs" component={MainTabs} />
+        <Stack.Screen name="CashierDeskScreen" component={CashierDeskScreen} />
         <Stack.Screen name="DailySales" component={DailySalesScreen}/>
         <Stack.Screen name="InventoryDashboardDetail" component={InventoryDashboardDetail}/>
         <Stack.Screen name="RestockScreen" component={RestockScreen}/>
