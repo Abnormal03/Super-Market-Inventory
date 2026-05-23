@@ -11,13 +11,30 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Button from "../../components/Button";
+import { useAuth } from "../../context/AuthContext";
 
 const { width } = Dimensions.get("window");
 
-export default function LoginScreen({ navigation }) {
+export default function LoginScreen() {
+  const { login, loading } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [focusedInput, setFocusedInput] = useState(null); // Tracks active input for custom focus rings
+  const [focusedInput, setFocusedInput] = useState(null);
+  const [error, setError] = useState(null);
+
+  async function handleLogin() {
+  if (!username.trim() || !password.trim()) {
+    setError("Please enter both username and password.");
+    return;
+  }
+  setError(null);
+  try {
+    await login(username.trim(), password);
+  } catch (err) {
+    setPassword("");
+    setError(err.message || "Login failed. Please try again.");
+  }
+}
 
   return (
     <KeyboardAvoidingView
@@ -30,10 +47,9 @@ export default function LoginScreen({ navigation }) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Decorative Background Elements for a Premium UI Look */}
         <View style={styles.topAmbientOrb} />
-        
-        {/* Header / Brand Identity Section */}
+
+        {/* Brand */}
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <Text style={styles.logoStock}>Stock</Text>
@@ -41,20 +57,31 @@ export default function LoginScreen({ navigation }) {
               <Text style={styles.logoPilot}>Pilot</Text>
             </View>
           </View>
-          <Text style={styles.subtitle}>Smart logistics & retail management command</Text>
+          <Text style={styles.subtitle}>
+            Smart logistics & retail management command
+          </Text>
         </View>
 
-        {/* Modern Frameless Card Structure */}
+        {/* Form Card */}
         <View style={styles.formCard}>
           <Text style={styles.formTitle}>Welcome Back</Text>
-          <Text style={styles.formSubtitle}>Sign in to your dashboard console</Text>
+          <Text style={styles.formSubtitle}>
+            Sign in to your dashboard console
+          </Text>
 
-          {/* Username Input Field */}
-          <Text style={styles.label}>Username or Email</Text>
-          <View 
+          {/* Error Banner */}
+          {error && (
+            <View style={styles.errorBanner}>
+              <Text style={styles.errorText}>⚠️ {error}</Text>
+            </View>
+          )}
+
+          {/* Username */}
+          <Text style={styles.label}>Username</Text>
+          <View
             style={[
-              styles.inputWrapper, 
-              focusedInput === "username" && styles.inputWrapperFocused
+              styles.inputWrapper,
+              focusedInput === "username" && styles.inputWrapperFocused,
             ]}
           >
             <Text style={styles.fieldIcon}>👤</Text>
@@ -70,17 +97,14 @@ export default function LoginScreen({ navigation }) {
             />
           </View>
 
-          {/* Password Input Field */}
+          {/* Password */}
           <View style={styles.labelRow}>
             <Text style={styles.label}>Password</Text>
-            <TouchableOpacity activeOpacity={0.6}>
-              <Text style={styles.forgotText}>Forgot?</Text>
-            </TouchableOpacity>
           </View>
-          <View 
+          <View
             style={[
-              styles.inputWrapper, 
-              focusedInput === "password" && styles.inputWrapperFocused
+              styles.inputWrapper,
+              focusedInput === "password" && styles.inputWrapperFocused,
             ]}
           >
             <Text style={styles.fieldIcon}>🔒</Text>
@@ -94,35 +118,54 @@ export default function LoginScreen({ navigation }) {
               autoCapitalize="none"
               onFocus={() => setFocusedInput("password")}
               onBlur={() => setFocusedInput(null)}
+              onSubmitEditing={handleLogin}
+              returnKeyType="go"
             />
           </View>
 
-          {/* Premium Button Placement */}
+          {/* Submit */}
           <View style={styles.buttonWrapper}>
-            <Button 
-              // text="Authenticate Security Key" 
-              text="Manager Demo"
-              variant="primary"
-              onPress={() => navigation.replace("MainTabs")} 
-            />
-          </View>
-          <View style={styles.buttonWrapper}>
-            <Button 
-              text="Cashier Demo"
-              variant="tertiary"
-              onPress={() => navigation.replace("CashierDeskScreen")} 
-            />
+            {loading ? (
+
+              <Button
+                text="logging..."
+                variant="primary"
+                onPress={handleLogin}
+              />
+            ) : (
+              <Button
+                text="Sign In"
+                variant="primary"
+                onPress={handleLogin}
+              />
+            )}
           </View>
 
-          {/* Clean Infrastructure Footnote */}
-          <Text style={styles.terminalFootnote}>Secure Enterprise Protocol v4.2.0</Text>
+          <Text style={styles.terminalFootnote}>
+            Developed by Group G, version 2.0
+          </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
+
 const styles = StyleSheet.create({
+    errorBanner: {
+    backgroundColor: "#fef2f2",
+    borderWidth: 1,
+    borderColor: "#fecaca",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 8,
+  },
+  errorText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#dc2626",
+  },
   container: {
     flex: 1,
     backgroundColor: "#f8fafc", // Clean, elegant light slate background matching dashboard

@@ -11,6 +11,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "We need access to your camera to scan product barcodes for inventory management."
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true
     },

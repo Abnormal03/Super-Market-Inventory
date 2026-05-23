@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,26 +7,26 @@ import {
   TouchableOpacity,
 } from "react-native";
 import BackButton from "../../components/BackButton";
+import { useAuth } from "../../context/AuthContext";
+import Button from "../../components/Button"
+
 
 export default function ProfileScreen({ navigation }) {
-  // Demo data (replace with API/DB fetch)
-  const account = {
-    name: "Abebe Kebede",
-    role: "Manager",
-    username: "abebe123",
-    phone: "+251 911 223344",
-    status: "Active",
-    id: 42,
-  };
 
-  const initial = account.name.charAt(0).toUpperCase();
+  const { employee, logout } = useAuth()
+
+  const initial = employee.name.charAt(0).toUpperCase();
+
+  const handleLogout = ()=>{
+    logout();
+  }
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <BackButton onPress={() => navigation?.goBack()} />
-        <Text style={styles.headerTitle}>Account Details</Text>
+        <Text style={styles.headerTitle}>employee Details</Text>
       </View>
 
       {/* Profile Card */}
@@ -39,23 +39,23 @@ export default function ProfileScreen({ navigation }) {
           <Text
             style={[
               styles.statusBadge,
-              account.status === "Active" ? styles.activeBadge : styles.inactiveBadge,
+              employee.status === "Active" ? styles.activeBadge : styles.inactiveBadge,
             ]}
           >
-            {account.status}
+            {employee.status}
           </Text>
         </View>
 
         {/* Name + Role */}
         <View style={styles.metaHeader}>
-          <Text style={styles.name}>{account.name}</Text>
+          <Text style={styles.name}>{employee.name}</Text>
           <Text
             style={[
               styles.roleTag,
-              account.role === "Manager" ? styles.managerTag : styles.cashierTag,
+              employee.role_name === "Manager" ? styles.managerTag : styles.cashierTag,
             ]}
           >
-            {account.role}
+            {employee.role_name}
           </Text>
         </View>
 
@@ -65,20 +65,21 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.details}>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Username</Text>
-            <Text style={styles.detailValue}>@{account.username}</Text>
+            <Text style={styles.detailValue}>@{employee.username}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Phone Number</Text>
-            <Text style={styles.detailValue}>{account.phone}</Text>
+            <Text style={styles.detailValue}>{employee.phone}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>System ID</Text>
-            <Text style={styles.detailValue}>#EMP-{String(account.id).padStart(4, "0")}</Text>
+            <Text style={styles.detailValue}>#EMP-{String(employee.id).padStart(4, "0")}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Session Status</Text>
             <Text style={[styles.detailValue, styles.connected]}>Connected</Text>
           </View>
+          <Button text={"log out"} variant="primary" onPress={handleLogout} />
         </View>
       </View>
     </ScrollView>
