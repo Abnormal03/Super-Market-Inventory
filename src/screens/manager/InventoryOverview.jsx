@@ -5,6 +5,7 @@ import {
   ScrollView,
   StyleSheet,
   RefreshControl,
+  Animated,
 } from "react-native";
 import { supabase } from "../../lib/supabase";
 import Button from "../../components/Button";
@@ -13,19 +14,19 @@ import InventoryStatCard from "../../components/InventoryStatCard";
 // ─── Supabase Queries ────────────────────────────────────────────────────────
 
 async function fetchInventoryStats() {
-  const today  = new Date().toISOString().split("T")[0];
-  const in60   = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const today = new Date().toISOString().split("T")[0];
+  const in60  = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
   const [
     { count: total_products },
     { data: soldRows },
-    { count: low_stock },
+    { data: lowStockRows },
     { count: out_of_stock },
-    { count: expiring_soon },
-    { count: expired },
+    { data: expiringSoonRows },
+    { data: expiredRowsRaw },
   ] = await Promise.all([
-    // Total distinct products
-    supabase.from("products").select("barcode", { count: "exact", head: true }),
+    // Total active products
+    supabase.from("products").select("barcode", { count: "exact", head: true }).eq("is_active", true),
 
     // Units sold today
     supabase
@@ -34,62 +35,66 @@ async function fetchInventoryStats() {
       .gte("sale_date", `${today}T00:00:00`)
       .lte("sale_date", `${today}T23:59:59`),
 
-    // Low stock: quantity > 0 but below min_stock_level
+    // Low stock: PostgREST can't compare two columns (quantity vs min_stock_level)
+    // directly via .filter() — it treats the second arg as a literal value, not a
+    // column reference. So fetch candidate rows and compare client-side instead.
     supabase
       .from("products")
-      .select("barcode", { count: "exact", head: true })
-      .gt("quantity", 0)
-      .filter("quantity", "lt", "min_stock_level"),
+      .select("barcode, quantity, min_stock_level")
+      .eq("is_active", true)
+      .gt("quantity", 0),
 
-    // Out of stock
+    // Out of stock — active only (literal comparison, fine as a head count)
     supabase
       .from("products")
       .select("barcode", { count: "exact", head: true })
-      .eq("quantity", 0),
+      .eq("quantity", 0)
+      .eq("is_active", true),
 
     // Expiring soon (within 60 days, not yet expired)
+    // Fetch raw rows + embedded is_active, filter client-side (avoids PostgREST
+    // join-filter quirks with !inner + dot-notation).
     supabase
       .from("stock_batches")
-      .select("id", { count: "exact", head: true })
+      .select("id, products ( is_active )")
       .gte("expiry_date", today)
       .lte("expiry_date", in60),
 
-    // Already expired
+    // Already expired — same client-side filter approach
     supabase
       .from("stock_batches")
-      .select("id", { count: "exact", head: true })
+      .select("id, products ( is_active )")
       .lt("expiry_date", today),
   ]);
 
-  const sales_today = soldRows?.reduce((sum, r) => sum + (r.quantity_sold ?? 0), 0) ?? 0;
+  const sales_today   = soldRows?.reduce((sum, r) => sum + (r.quantity_sold ?? 0), 0) ?? 0;
+  const low_stock      = (lowStockRows     ?? []).filter((p) => p.quantity < p.min_stock_level).length;
+  const expiring_soon  = (expiringSoonRows ?? []).filter((b) => b.products?.is_active).length;
+  const expired        = (expiredRowsRaw   ?? []).filter((b) => b.products?.is_active).length;
 
   return {
     total_products: total_products ?? 0,
     sales_today,
-    low_stock:      low_stock     ?? 0,
-    out_of_stock:   out_of_stock  ?? 0,
-    expiring_soon:  expiring_soon ?? 0,
-    expired:        expired       ?? 0,
+    low_stock,
+    out_of_stock: out_of_stock ?? 0,
+    expiring_soon,
+    expired,
   };
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function InventoryOverview({ navigation }) {
-  const [stats, setStats]       = useState(null);
-  const [loading, setLoading]   = useState(true);
+  const [stats, setStats]           = useState(null);
+  const [loading, setLoading]       = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError]       = useState(null);
-  
-  // Animated must be imported — add it here since we use it in ref init
-  const { Animated } = require("react-native");
+  const [error, setError]           = useState(null);
 
   // Animation refs — one pair per card (6 cards)
-  const fadeAnims  = useRef(Array.from({ length: 6 }, () => new Animated.Value(0))).current;
-  const slideAnims = useRef(Array.from({ length: 6 }, () => new Animated.Value(30))).current;
+  const fadeAnims   = useRef(Array.from({ length: 6 }, () => new Animated.Value(0))).current;
+  const slideAnims  = useRef(Array.from({ length: 6 }, () => new Animated.Value(30))).current;
   const fadeHeader  = useRef(new Animated.Value(0)).current;
   const slideHeader = useRef(new Animated.Value(20)).current;
-
 
   const runAnimations = () => {
     Animated.stagger(80, [
@@ -99,8 +104,8 @@ export default function InventoryOverview({ navigation }) {
       ]),
       ...fadeAnims.map((fade, i) =>
         Animated.parallel([
-          Animated.timing(fade,         { toValue: 1, duration: 400, useNativeDriver: true }),
-          Animated.timing(slideAnims[i],{ toValue: 0, duration: 400, useNativeDriver: true }),
+          Animated.timing(fade,          { toValue: 1, duration: 400, useNativeDriver: true }),
+          Animated.timing(slideAnims[i], { toValue: 0, duration: 400, useNativeDriver: true }),
         ])
       ),
     ]).start();

@@ -23,7 +23,8 @@ async function fetchByFilter(filter) {
       const { data, error } = await supabase
         .from("products")
         .select("name, barcode, quantity, min_stock_level, stock_batches(id, expiry_date)")
-        .order("name");
+        .order("name")
+        .eq("is_active", true);
       if (error) throw error;
       return data.map((p) => ({
         name:        p.name,
@@ -41,7 +42,8 @@ async function fetchByFilter(filter) {
       const { data, error } = await supabase
         .from("products")
         .select("name, barcode, quantity, min_stock_level, stock_batches(id, expiry_date)")
-        .gt("quantity", 0);
+        .gt("quantity", 0)
+        .eq("is_active", true);
       if (error) throw error;
       // Filter client-side: quantity < min_stock_level
       // (Supabase can't compare two columns in .filter directly without RPC)
@@ -62,7 +64,8 @@ async function fetchByFilter(filter) {
         .from("products")
         .select("name, barcode, quantity, min_stock_level")
         .eq("quantity", 0)
-        .order("name");
+        .order("name")
+        .eq("is_active", true);
       if (error) throw error;
       return data.map((p) => ({
         name:        p.name,
@@ -76,11 +79,11 @@ async function fetchByFilter(filter) {
 
     case "expiring": {
       const { data, error } = await supabase
-        .from("stock_batches")
-        .select("id, expiry_date, quantity, products(name, barcode)")
-        .gte("expiry_date", today)
-        .lte("expiry_date", in60)
-        .order("expiry_date");
+      .from("stock_batches")
+      .select("id, expiry_date, quantity, products ( name, barcode, is_active )")
+      .gte("expiry_date", today)
+      .lte("expiry_date", in60)
+      .order("expiry_date");
       if (error) throw error;
       return data.map((b) => {
         const diff = Math.ceil(
@@ -103,7 +106,8 @@ async function fetchByFilter(filter) {
         .from("stock_batches")
         .select("id, expiry_date, quantity, products(name, barcode)")
         .lt("expiry_date", today)
-        .order("expiry_date", { ascending: false });
+        .order("expiry_date", { ascending: false })
+        .eq("products.is_active", true);
       if (error) throw error;
       return data.map((b) => {
         const diff = Math.ceil(

@@ -84,6 +84,7 @@ async function submitRestock({ barcode, name, sellingPrice, category_id, quantit
         selling_price: selling,
         category_id: category_id, 
         quantity: existing.quantity + qty,
+        is_active: true
       })
       .eq("barcode", barcode.trim());
 

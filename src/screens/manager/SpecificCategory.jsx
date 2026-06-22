@@ -27,6 +27,7 @@ async function fetchProductsByCategory(categoryId) {
       stock_batches ( cost_price )
     `)
     .eq("category_id", categoryId)
+    .eq("is_active", true)      // 🆕 only show active products
     .order("name");
 
   if (error) throw error;
@@ -55,19 +56,12 @@ async function fetchProductsByCategory(categoryId) {
   });
 }
 
-async function deleteProduct(barcode) {
-  // Delete batches first (foreign key), then product
-  const { error: batchErr } = await supabase
-    .from("stock_batches")
-    .delete()
-    .eq("product_barcode", barcode);
-  if (batchErr) throw batchErr;
-
-  const { error: productErr } = await supabase
+async function archiveProduct(barcode) {
+  const { error } = await supabase
     .from("products")
-    .delete()
+    .update({ is_active: false, quantity: 0 })
     .eq("barcode", barcode);
-  if (productErr) throw productErr;
+  if (error) throw error;
 }
 
 // ─── Status helpers ───────────────────────────────────────────────────────────
@@ -118,30 +112,29 @@ export default function SpecificCategory({ navigation, route }) {
   // ── Delete ──────────────────────────────────────────────────────────────────
 
   const handleDelete = (product) => {
-    Alert.alert(
-      "Delete Product",
-      `Remove "${product.name}" and all its stock batches? This cannot be undone.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            setDeletingId(product.barcode);
-            try {
-              await deleteProduct(product.barcode);
-              // Remove locally for instant UI feedback
-              setProducts((prev) => prev.filter((p) => p.barcode !== product.barcode));
-            } catch (err) {
-              Alert.alert("Error", err.message || "Failed to delete product.");
-            } finally {
-              setDeletingId(null);
-            }
-          },
+  Alert.alert(
+    "Archive Product",
+    `Remove "${product.name}" from active inventory? Past sales will still be kept in your reports.`,
+    [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Archive",
+        style: "destructive",
+        onPress: async () => {
+          setDeletingId(product.barcode);
+          try {
+            await archiveProduct(product.barcode); // 🆕
+            setProducts((prev) => prev.filter((p) => p.barcode !== product.barcode));
+          } catch (err) {
+            Alert.alert("Error", err.message || "Failed to archive product.");
+          } finally {
+            setDeletingId(null);
+          }
         },
-      ]
-    );
-  };
+      },
+    ]
+  );
+};
 
   // ── Filtered list ───────────────────────────────────────────────────────────
 

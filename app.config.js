@@ -1,12 +1,12 @@
 import 'dotenv/config'
 
 export default {
-  expo: {
-    name: 'StockApp',
-    slug: 'stock-app',
-    extra: {
-      supabaseUrl: process.env.SUPABASE_URL,
-      supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
-    },
-  },
+  "expo": {
+    "name": "StockPilot",
+    "version": "1.0.0",
+    "android": {
+      "package": "com.normalab.stockpilot",
+      "versionCode": 1
+    }
+  }
 }

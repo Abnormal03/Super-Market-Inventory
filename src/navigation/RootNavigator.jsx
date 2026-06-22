@@ -15,6 +15,7 @@ import RegisterSupplier from "../screens/manager/RegisterSupplier";
 import CashierLeaderboard from "../screens/manager/CashierLeaderboard";
 import ProfileScreen from "../screens/manager/ProfileScreen";
 import TransactionDetailScreen from "../screens/manager/TransactionDetailScreen";
+import NotificationsScreen from "../screens/manager/NotificationsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -51,6 +52,7 @@ function AppNavigator() {
           <Stack.Screen name="CashierLeaderboard" component={CashierLeaderboard} />
           <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
           <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} />
+          <Stack.Screen name="NotificationsScreen" component={NotificationsScreen} />
         </>
       )}
     </Stack.Navigator>

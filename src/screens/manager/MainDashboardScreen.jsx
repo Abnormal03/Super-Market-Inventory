@@ -15,6 +15,9 @@ import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/Button";
 import StatCard from "../../components/StatCard";
 import TopSellerCard from "../../components/TopSellerCard";
+import NotificationBell from "../../components/NotificationBell";
+import { fetchUnreadCount } from "../../lib/notifications";
+import { useFocusEffect } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 
@@ -153,6 +156,9 @@ export default function MainDashboardScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError]           = useState(null);
 
+  //notifications...
+  const [unreadCount, setUnreadCount] = useState(0);
+
   // Animations
   const fadeHeader    = useRef(new Animated.Value(0)).current;
   const fadeChart     = useRef(new Animated.Value(0)).current;
@@ -208,6 +214,13 @@ export default function MainDashboardScreen({ navigation }) {
     })();
   }, []);
 
+  //notification...
+  useFocusEffect(
+    useCallback(() => {
+      fetchUnreadCount(employee?.id).then(setUnreadCount).catch(() => {});
+    }, [employee?.id])
+  );
+
   const onRefresh = async () => {
     setRefreshing(true);
     await loadData();
@@ -243,6 +256,11 @@ export default function MainDashboardScreen({ navigation }) {
           <Text style={styles.headerSubtitle}>Managers Dashboard</Text>
           <Text style={styles.headerTitle}>Welcome back, {employee?.name.split(" ")[0]}</Text>
         </View>
+        
+        <NotificationBell
+          count={unreadCount}
+          onPress={() => navigation.navigate("NotificationsScreen")}
+        />
         <TouchableOpacity
           style={styles.avatarMini}
           onPress={() => navigation.navigate("ProfileScreen")}

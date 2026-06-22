@@ -44,7 +44,7 @@ async function fetchCategories() {
   // Fetch categories with product count and total units
   const { data, error } = await supabase
     .from("categories")
-    .select("id, category_name, products ( barcode, quantity ) ")
+    .select("id, category_name, products ( barcode, quantity, is_active ) ")
     .order("category_name");
 
   if (error){
@@ -56,8 +56,8 @@ async function fetchCategories() {
     id:       cat.id,
     name:     cat.category_name,
     icon:     getCategoryIcon(cat.category_name),
-    products: cat.products?.length ?? 0,
-    units:    cat.products?.reduce((sum, p) => sum + (p.quantity ?? 0), 0) ?? 0,
+    products: cat.products?.filter((p) => p.is_active).length ?? 0,
+    units: cat.products?.filter((p) => p.is_active).reduce((sum, p) => sum + (p.quantity ?? 0), 0) ?? 0,
   }));
 }
 
